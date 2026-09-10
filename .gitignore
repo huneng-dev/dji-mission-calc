@@ -2,3 +2,4 @@
 .omo/
 .DS_Store
 *.log
+.playwright-mcp/
