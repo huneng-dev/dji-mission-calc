@@ -7,14 +7,12 @@
   <meta name="description" content="基于物理焦距与物理传感器尺寸的专业 DJI 航线计算器，纯前端静态单页，支持 PC 与移动端自适应，实时计算拍照间隔、航线间距、幅宽覆盖与 GSD 分辨率。" />
   <title>DJI 航拍航线计算器 · 物理光学参数</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- 引入优质衬线字体衬托 Claude Editorial 质感 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
   <div class="page-container">
-    <!-- Header -->
     <header class="site-header">
       <div class="brand-pill">
         <span class="pill-dot"></span>
@@ -26,12 +24,9 @@
       </p>
     </header>
 
-    <!-- 错误横幅提示 -->
     <div id="error-banner" class="error-banner" style="display:none" role="alert"></div>
 
-    <!-- 主布局网格 (PC 两栏自适应，移动端流式单栏) -->
     <main class="main-layout">
-      <!-- 左侧：参数输入区 -->
       <section class="panel-card" aria-labelledby="inputs-heading">
         <div class="panel-header">
           <h2 id="inputs-heading" class="panel-title">飞行与任务参数</h2>
@@ -65,7 +60,6 @@
           <div id="cam-meta" class="cam-meta-chips" aria-live="polite"></div>
         </div>
 
-        <!-- 自定义相机面板 (仅在选自定义时展开) -->
         <div id="custom-panel" class="custom-panel" aria-label="自定义相机参数配置">
           <div class="custom-header">
             <span class="custom-title">自定义传感器与镜头光学参数</span>
@@ -98,7 +92,6 @@
 
         <div class="divider"></div>
 
-        <!-- 航线空间参数 -->
         <div class="field-grid-2">
           <div class="input-block">
             <label for="input-H" class="field-label">
@@ -122,7 +115,6 @@
           </div>
         </div>
 
-        <!-- 重叠度参数 -->
         <div class="field-grid-2">
           <div class="input-block">
             <label for="input-fwd" class="field-label">
@@ -146,7 +138,6 @@
           </div>
         </div>
 
-        <!-- 飞行速度与可选反算 -->
         <div class="field-grid-2">
           <div class="input-block">
             <label for="input-speed" class="field-label">
@@ -171,14 +162,12 @@
         </div>
       </section>
 
-      <!-- 右侧：计算结果与视觉反馈区 -->
       <section class="panel-card results-card" aria-labelledby="results-heading">
         <div class="panel-header">
           <h2 id="results-heading" class="panel-title">规划解算与覆盖</h2>
           <span class="panel-tag accent-tag">实时求解</span>
         </div>
 
-        <!-- 核心主角指标：拍照间隔 -->
         <div class="hero-result-card">
           <div class="hero-header">
             <span class="hero-label">推荐定时拍照间隔</span>
@@ -191,7 +180,6 @@
           <div class="hero-subtext">根据航向覆盖幅宽与重叠度实时推导</div>
         </div>
 
-        <!-- 次级核心参数网格 -->
         <div class="metrics-grid">
           <div class="metric-cell">
             <div class="m-label">航向覆盖幅宽 (L)</div>
@@ -247,7 +235,6 @@
             <div class="m-sub">f₀ × 变焦倍率</div>
           </div>
 
-          <!-- 目标 GSD 反算高度行 -->
           <div class="metric-cell highlight-cell span-full" id="h-from-gsd-row" style="display:none">
             <div class="m-label">满足目标 GSD 的反算飞行高度</div>
             <div class="m-value-wrap">
@@ -286,7 +273,6 @@
           </div>
         </div>
 
-        <!-- 一键复制结果操作栏 -->
         <div class="action-bar">
           <button type="button" id="copy-btn" class="btn-primary">
             <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -297,7 +283,6 @@
           </button>
         </div>
 
-        <!-- 详细公式折叠面板 -->
         <details class="formula-details">
           <summary class="formula-summary">
             <span class="formula-summary-title">查看完整光学与几何解算公式</span>
@@ -344,10 +329,8 @@
     </main>
   </div>
 
-  <!-- 轻量轻提示 Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- 纯前端脚本逻辑：零外部网络加载，零 Python 依赖 -->
   <script src="app.js"></script>
 </body>
 </html>

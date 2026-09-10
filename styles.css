@@ -72,6 +72,7 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 body {
@@ -81,26 +82,49 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
   background-image: radial-gradient(circle at 50% 0%, rgba(217, 119, 87, 0.03) 0%, transparent 50%);
 }
 
-/* 页面主居中容器 */
 .page-container {
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 2.25rem 1.25rem 4rem;
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2.25rem 1.5rem 4rem;
+  box-sizing: border-box;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .page-container {
     padding: 1.5rem 1rem 3rem;
   }
 }
 
-/* ==========================================================================
-   头部排版 (Claude 标志性人文主义风格)
-   ========================================================================== */
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .main-layout {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 1.75rem;
+  }
+}
+
+.panel-card {
+  min-width: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.6rem 1.4rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-normal);
+  box-sizing: border-box;
+}
 
 .site-header {
   text-align: center;
@@ -151,10 +175,6 @@ body {
   line-height: 1.6;
 }
 
-/* ==========================================================================
-   错误横幅
-   ========================================================================== */
-
 .error-banner {
   background: var(--error-bg);
   border: 1px solid var(--error-border);
@@ -165,40 +185,6 @@ body {
   margin-bottom: 1.5rem;
   line-height: 1.5;
   box-shadow: var(--shadow-sm);
-}
-
-/* ==========================================================================
-   主栅格布局 (PC 双栏并排自适应 / 移动端自然折行)
-   ========================================================================== */
-
-.main-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (min-width: 900px) {
-  .main-layout {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.75rem;
-  }
-}
-
-/* 面板卡片基础 */
-.panel-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 1.6rem 1.4rem;
-  box-shadow: var(--shadow-card);
-  transition: box-shadow var(--transition-normal);
-}
-
-@media (min-width: 640px) {
-  .panel-card {
-    padding: 1.85rem 1.75rem;
-  }
 }
 
 .panel-header {
@@ -234,16 +220,11 @@ body {
   border: 1px solid var(--accent-soft-border);
 }
 
-/* 分隔线 */
 .divider {
   height: 1px;
   background: var(--border-subtle);
   margin: 1.25rem 0;
 }
-
-/* ==========================================================================
-   表单与输入组件
-   ========================================================================== */
 
 .input-block {
   margin-bottom: 1.15rem;
@@ -278,13 +259,13 @@ body {
 
 .field-grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.9rem;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 540px) {
   .field-grid-2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.8rem;
   }
 }
