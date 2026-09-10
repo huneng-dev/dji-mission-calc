@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#FAF7F2" />
+  <meta name="description" content="基于物理焦距与物理传感器尺寸的专业 DJI 航线计算器，纯前端静态单页，支持 PC 与移动端自适应，实时计算拍照间隔、航线间距、幅宽覆盖与 GSD 分辨率。" />
+  <title>DJI 航拍航线计算器 · 物理光学参数</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- 引入优质衬线字体衬托 Claude Editorial 质感 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="page-container">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="brand-pill">
+        <span class="pill-dot"></span>
+        <span class="pill-text">物理光学模型 · 航测实测校验</span>
+      </div>
+      <h1 class="site-title">DJI 航拍航线计算器</h1>
+      <p class="site-description">
+        基于传感器物理尺寸与真物理焦距，精准测算正射/倾斜任务中的拍照间隔、曝光间距、覆盖幅宽与 GSD 分辨率。
+      </p>
+    </header>
+
+    <!-- 错误横幅提示 -->
+    <div id="error-banner" class="error-banner" style="display:none" role="alert"></div>
+
+    <!-- 主布局网格 (PC 两栏自适应，移动端流式单栏) -->
+    <main class="main-layout">
+      <!-- 左侧：参数输入区 -->
+      <section class="panel-card" aria-labelledby="inputs-heading">
+        <div class="panel-header">
+          <h2 id="inputs-heading" class="panel-title">飞行与任务参数</h2>
+          <span class="panel-tag">输入区</span>
+        </div>
+
+        <div class="input-block">
+          <label id="camera-label" class="field-label">
+            <span>无人机 / 相机机型</span>
+            <span class="label-aside">含镜头物理参数</span>
+          </label>
+          <div class="custom-select-container" id="camera-select-container">
+            <button type="button" class="custom-select-trigger" id="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="camera-label">
+              <span class="trigger-label" id="trigger-label">M3TD 广角</span>
+              <span class="trigger-arrow"></span>
+            </button>
+            <div class="custom-select-backdrop" id="custom-select-backdrop"></div>
+            <div class="custom-select-dropdown" id="custom-select-dropdown" role="listbox" aria-labelledby="camera-label">
+              <div class="dropdown-mobile-header">
+                <div class="dropdown-drag-handle"></div>
+                <div class="dropdown-title">选择无人机 / 相机机型</div>
+                <button type="button" class="dropdown-close-btn" id="dropdown-close-btn" aria-label="关闭">✕</button>
+              </div>
+              <div class="dropdown-scroll-area" id="dropdown-options"></div>
+            </div>
+            <select id="camera" class="visually-hidden" aria-hidden="true" tabindex="-1"></select>
+          </div>
+          <div id="cam-meta" class="cam-meta-chips" aria-live="polite"></div>
+        </div>
+          <!-- 动态相机元信息标签 -->
+          <div id="cam-meta" class="cam-meta-chips" aria-live="polite"></div>
+        </div>
+
+        <!-- 自定义相机面板 (仅在选自定义时展开) -->
+        <div id="custom-panel" class="custom-panel" aria-label="自定义相机参数配置">
+          <div class="custom-header">
+            <span class="custom-title">自定义传感器与镜头光学参数</span>
+          </div>
+          <div class="field-grid-2">
+            <div class="input-block">
+              <label for="custom-sw" class="field-label">传感器物理宽 <span class="unit">mm</span></label>
+              <input type="number" id="custom-sw" inputmode="decimal" step="any" min="0.01" />
+            </div>
+            <div class="input-block">
+              <label for="custom-sh" class="field-label">传感器物理高 <span class="unit">mm</span></label>
+              <input type="number" id="custom-sh" inputmode="decimal" step="any" min="0.01" />
+            </div>
+          </div>
+          <div class="field-grid-2">
+            <div class="input-block">
+              <label for="custom-f0" class="field-label">基础物理焦距 f₀ <span class="unit">mm</span></label>
+              <input type="number" id="custom-f0" inputmode="decimal" step="any" min="0.01" />
+            </div>
+            <div class="input-block">
+              <label for="custom-iw" class="field-label">图像物理宽 <span class="unit">px</span></label>
+              <input type="number" id="custom-iw" inputmode="numeric" step="1" min="1" />
+            </div>
+          </div>
+          <div class="input-block">
+            <label for="custom-ih" class="field-label">图像物理高 <span class="unit">px</span></label>
+            <input type="number" id="custom-ih" inputmode="numeric" step="1" min="1" />
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 航线空间参数 -->
+        <div class="field-grid-2">
+          <div class="input-block">
+            <label for="input-H" class="field-label">
+              <span>相对高度 H</span>
+              <span class="unit">m</span>
+            </label>
+            <div class="input-suffix-wrapper">
+              <input type="number" id="input-H" inputmode="decimal" value="60" step="any" min="0.1" />
+              <span class="input-suffix">米</span>
+            </div>
+          </div>
+          <div class="input-block">
+            <label for="input-zoom" class="field-label">
+              <span>变焦倍率</span>
+              <span class="unit">×</span>
+            </label>
+            <div class="input-suffix-wrapper">
+              <input type="number" id="input-zoom" inputmode="decimal" value="1" step="any" min="0.1" />
+              <span class="input-suffix">倍</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 重叠度参数 -->
+        <div class="field-grid-2">
+          <div class="input-block">
+            <label for="input-fwd" class="field-label">
+              <span>航向重叠度</span>
+              <span class="unit">%</span>
+            </label>
+            <div class="input-suffix-wrapper">
+              <input type="number" id="input-fwd" inputmode="decimal" value="30" step="any" min="0" max="99.9" />
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          <div class="input-block">
+            <label for="input-side" class="field-label">
+              <span>旁向重叠度</span>
+              <span class="unit">%</span>
+            </label>
+            <div class="input-suffix-wrapper">
+              <input type="number" id="input-side" inputmode="decimal" value="70" step="any" min="0" max="99.9" />
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 飞行速度与可选反算 -->
+        <div class="field-grid-2">
+          <div class="input-block">
+            <label for="input-speed" class="field-label">
+              <span>巡航速度 v</span>
+              <span class="unit">m/s</span>
+            </label>
+            <div class="input-suffix-wrapper">
+              <input type="number" id="input-speed" inputmode="decimal" value="8" step="any" min="0.01" />
+              <span class="input-suffix">m/s</span>
+            </div>
+          </div>
+          <div class="input-block">
+            <label for="input-gsd-target" class="field-label">
+              <span>目标 GSD</span>
+              <span class="unit">cm/px</span>
+            </label>
+            <div class="input-suffix-wrapper">
+              <input type="number" id="input-gsd-target" inputmode="decimal" value="" step="any" min="0.01" placeholder="留空则不反算" />
+              <span class="input-suffix">cm</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右侧：计算结果与视觉反馈区 -->
+      <section class="panel-card results-card" aria-labelledby="results-heading">
+        <div class="panel-header">
+          <h2 id="results-heading" class="panel-title">规划解算与覆盖</h2>
+          <span class="panel-tag accent-tag">实时求解</span>
+        </div>
+
+        <!-- 核心主角指标：拍照间隔 -->
+        <div class="hero-result-card">
+          <div class="hero-header">
+            <span class="hero-label">推荐定时拍照间隔</span>
+            <span class="hero-badge">核心控制量</span>
+          </div>
+          <div class="hero-value-wrap">
+            <span id="out-interval" class="hero-value">—</span>
+            <span class="hero-unit">秒 / 张</span>
+          </div>
+          <div class="hero-subtext">根据航向覆盖幅宽与重叠度实时推导</div>
+        </div>
+
+        <!-- 次级核心参数网格 -->
+        <div class="metrics-grid">
+          <div class="metric-cell">
+            <div class="m-label">航向覆盖幅宽 (L)</div>
+            <div class="m-value-wrap">
+              <span id="out-L" class="m-value">—</span>
+              <span class="m-unit">m</span>
+            </div>
+            <div class="m-sub">飞行行进单张覆盖</div>
+          </div>
+
+          <div class="metric-cell">
+            <div class="m-label">旁向覆盖幅宽 (W)</div>
+            <div class="m-value-wrap">
+              <span id="out-W" class="m-value">—</span>
+              <span class="m-unit">m</span>
+            </div>
+            <div class="m-sub">横向单张视野宽度</div>
+          </div>
+
+          <div class="metric-cell">
+            <div class="m-label">曝光拍照间距</div>
+            <div class="m-value-wrap">
+              <span id="out-photo-spacing" class="m-value">—</span>
+              <span class="m-unit">m</span>
+            </div>
+            <div class="m-sub">航向相邻两张距离</div>
+          </div>
+
+          <div class="metric-cell">
+            <div class="m-label">航线间距</div>
+            <div class="m-value-wrap">
+              <span id="out-line-spacing" class="m-value">—</span>
+              <span class="m-unit">m</span>
+            </div>
+            <div class="m-sub">平行航带间距</div>
+          </div>
+
+          <div class="metric-cell">
+            <div class="m-label">地面采样分辨率 (GSD)</div>
+            <div class="m-value-wrap">
+              <span id="out-gsd" class="m-value">—</span>
+              <span class="m-unit">cm/px</span>
+            </div>
+            <div class="m-sub">地面单个像元代表尺寸</div>
+          </div>
+
+          <div class="metric-cell">
+            <div class="m-label">有效物理焦距 (f)</div>
+            <div class="m-value-wrap">
+              <span id="out-f" class="m-value">—</span>
+              <span class="m-unit">mm</span>
+            </div>
+            <div class="m-sub">f₀ × 变焦倍率</div>
+          </div>
+
+          <!-- 目标 GSD 反算高度行 -->
+          <div class="metric-cell highlight-cell span-full" id="h-from-gsd-row" style="display:none">
+            <div class="m-label">满足目标 GSD 的反算飞行高度</div>
+            <div class="m-value-wrap">
+              <span id="out-h-from-gsd" class="m-value">—</span>
+              <span class="m-unit">m</span>
+            </div>
+            <div class="m-sub">根据目标分辨率精准建议的作业真高</div>
+          </div>
+        </div>
+
+        <div class="diagram-card" aria-label="3D 航线视野与覆盖几何示意图">
+          <div class="diagram-header">
+            <div class="diagram-title-group">
+              <span class="diagram-title">视野投影与重叠几何</span>
+              <span class="diagram-badge-3d">3D 空间</span>
+            </div>
+            <div class="diagram-controls-bar">
+              <button type="button" class="view-btn active" data-view="orbit" title="3D 自由旋转透视">3D 透视</button>
+              <button type="button" class="view-btn" data-view="top" title="俯瞰顶视图">顶视</button>
+              <button type="button" class="view-btn" data-view="side" title="侧视剖面图">侧视</button>
+              <button type="button" class="view-btn icon-btn" id="btn-reset-3d" title="复位视角">↺</button>
+            </div>
+          </div>
+          <div class="canvas-3d-wrapper">
+            <canvas id="view-3d"></canvas>
+            <div class="canvas-hud">
+              <span class="hud-tag" id="hud-h">H 60.0m</span>
+              <span class="hud-tag" id="hud-dim">幅宽 42.9×32.2m</span>
+              <span class="hud-tag" id="hud-overlap">重叠 30% / 70%</span>
+            </div>
+            <div class="canvas-hint">拖拽 360° 旋转 · 滚轮缩放</div>
+            <div class="canvas-zoom-controls">
+              <button type="button" class="zoom-btn" id="btn-zoom-in" title="放大视角">+</button>
+              <button type="button" class="zoom-btn" id="btn-zoom-out" title="缩小视角">−</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 一键复制结果操作栏 -->
+        <div class="action-bar">
+          <button type="button" id="copy-btn" class="btn-primary">
+            <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>一键复制规划简报</span>
+          </button>
+        </div>
+
+        <!-- 详细公式折叠面板 -->
+        <details class="formula-details">
+          <summary class="formula-summary">
+            <span class="formula-summary-title">查看完整光学与几何解算公式</span>
+            <span class="formula-summary-icon"></span>
+          </summary>
+          <div class="formula-body">
+            <ul class="formula-list">
+              <li>
+                <div class="formula-desc">有效物理焦距</div>
+                <code class="formula-code">f = f₀ × zoom (mm)</code>
+              </li>
+              <li>
+                <div class="formula-desc">地面航向单张视野 (沿航线方向)</div>
+                <code class="formula-code">L = (H × sensor_h) / f (m)</code>
+              </li>
+              <li>
+                <div class="formula-desc">地面旁向单张视野 (垂直航线幅宽)</div>
+                <code class="formula-code">W = (H × sensor_w) / f (m)</code>
+              </li>
+              <li>
+                <div class="formula-desc">航向曝光曝光间距 (拍照空间步长)</div>
+                <code class="formula-code">photo_spacing = L × (1 − 航向重叠度) (m)</code>
+              </li>
+              <li>
+                <div class="formula-desc">定时拍照触发时间间隔</div>
+                <code class="formula-code">interval = photo_spacing / 飞行速度 (s)</code>
+              </li>
+              <li>
+                <div class="formula-desc">航线间距 (相邻航条横向偏置)</div>
+                <code class="formula-code">line_spacing = W × (1 − 旁向重叠度) (m)</code>
+              </li>
+              <li>
+                <div class="formula-desc">地面像元分辨率 (GSD)</div>
+                <code class="formula-code">GSD_cm = (H × sensor_w × 100) / (f × image_w) (cm/px)</code>
+              </li>
+              <li>
+                <div class="formula-desc">由期望 GSD 反算设计飞行高度</div>
+                <code class="formula-code">H = (GSD_cm × f × image_w) / (sensor_w × 100) (m)</code>
+              </li>
+            </ul>
+          </div>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <!-- 轻量轻提示 Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- 纯前端脚本逻辑：零外部网络加载，零 Python 依赖 -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+.codegraph/
+.omo/
+.DS_Store
+*.log
