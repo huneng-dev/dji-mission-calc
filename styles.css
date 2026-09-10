@@ -834,7 +834,7 @@ input[type="text"]:focus {
 
 .diagram-card {
   background: var(--bg-surface-elevated);
-  border: none;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 1.1rem;
   margin-bottom: 1.25rem;
