@@ -20,6 +20,14 @@
 
 ---
 
+## 🌐 在线体验 (GitHub Pages)
+
+项目已通过 GitHub Pages 在线部署，支持手机与电脑直接访问：
+
+👉 **[https://huneng-dev.github.io/dji-mission-calc/](https://huneng-dev.github.io/dji-mission-calc/)**
+
+---
+
 ## 🚀 部署与使用方式
 
 ### 方式一：本地直接双击打开（最简单）
